@@ -15,7 +15,6 @@ module.exports.authenticate = function(req,res) {
     //Login form information
     var email = req.body.email;
     var password = req.body.password;
-    console.log(email, password)
 
     //Database query to authenticate user
     db.query('SELECT * FROM user WHERE email = ?', [email], function (error, results, fields){
@@ -31,41 +30,56 @@ module.exports.authenticate = function(req,res) {
             if(results.length > 0) {
                     
                 //Check if the password is correct
-                if(bcrypt.compare(password == results[0].password)) {
+                bcrypt.compare(password, results[0].password, function (err, response) {
 
-                    //Generate token that expires in 60m (modify as needed)
-                    const token = jwt.sign({ email }, accessTokenSecret, { expiresIn: '60m' });
-                    const user_id = results[0].id
+                    if (err) {
 
-                    //Insert token in cookies
-                    res.cookie('token', token, {httpOnly: true});
-                    console.log('login', results)
-                    res.json({
-                        token,
-                        status:200,
-                        user_id: user_id,
-                        user: results[0],
-                        message: 'Successfully authenticate'
-                    })
-                } else {
+                        console.log("Erro: ", err)
 
-                    //Email exists, but password is incorrect
-                    //Keep message below for security reasons by not indicating what the error was
-                    res.json({
-                        status:400,
-                        message: "Email and password does not match"
-                    });
-                    res.status(400)
-                }
-            } else {
+                    } else {
+   
+                        
+                        if ( response == false) {
+                            
+                            console.log("bcrypt falsa")
+                            //Email exists, but password is incorrect
+                            //Keep message below for security reasons by not indicating what the error was
+                            res.json({
+                                status:false,
+                                message: "Email and password does not match"
+                            });
+                            res.status(400)
+                        } else {
+
+                            console.log("bcrypt verdadeira")
+                            //Generate token that expires in 60m (modify as needed)
+                            const token = jwt.sign({ email }, accessTokenSecret, { expiresIn: '60m' });
+                            const user_id = results[0].id
+
+                            //Insert token in cookies
+                            res.cookie('token', token, {httpOnly: true});
+                            console.log('login', results)
+                            res.json({
+                                token,
+                                status:200,
+                                user_id: user_id,
+                                user: results[0],
+                                message: 'Successfully authenticate'
+                            })
+                        } 
+                    }
+
+                })
                 
-                //If the email does not exist already returns an error
-                res.json({
-                    status:400,
-                    message: "Please enter valid information."
-                });
-                res.status(400)
-            }
+        } else {
+            
+            //If the email does not exist already returns an error
+            res.json({
+                status:400,
+                message: "Please enter valid information."
+            });
+            res.status(400)
+        }
         }
     });
 }

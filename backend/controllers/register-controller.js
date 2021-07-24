@@ -6,8 +6,6 @@ const BCRYPT_SALT_ROUNDS = 12
 //Controller responsible for registration
 module.exports.register = function(req, res) {
 
-    //bcrypt.hashSync(req.body.password, BCRYPT_SALT_ROUNDS)
-
     //Registration form information
     bcrypt
         .hash(req.body.password, BCRYPT_SALT_ROUNDS)

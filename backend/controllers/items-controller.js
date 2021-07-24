@@ -14,7 +14,6 @@ module.exports.createItem = function(req, res) {
         "id": uuidv4(),
         "name": req.body.name,
         "meals": req.body.meals,
-        "stock": req.body.stock,
         "description": req.body.description
     }
     //New item information
@@ -45,7 +44,7 @@ module.exports.createItem = function(req, res) {
 // Table with item in Navigation Two Menu (Name and Description)
 module.exports.itemTable = function(req, res, next) {
     //Database query to select all dashboards
-    db.query('SELECT item.id AS id, item.name AS name, item.stock AS stock, item.meals AS meals, item.description AS description FROM item', function (error, results, rows) {
+    db.query('SELECT item.id AS id, item.name AS name, item.meals AS meals, item.description AS description FROM item', function (error, results, rows) {
     if(error) {
             console.log("There are some error with query");
             console.log(error)
@@ -90,13 +89,12 @@ module.exports.updateItem = function(req, res) {
     const id = req.params
     const name = req.body.name
     const meals = req.body.meals
-    const stock = req.query.stock
     const description = req.body.description
     //New item information
-    let data = [name, stock, description, meals, id.itemId];
+    let data = [name, description, meals, id.itemId];
     console.log("data", data)
     //Database query to save item
-    db.query('UPDATE item SET name = ?, stock = ?, description = ?, meals = ?  WHERE id = ?', data, function(error, results, fields){
+    db.query('UPDATE item SET name = ?, description = ?, meals = ?  WHERE id = ?', data, function(error, results, fields){
         if(error) {
             res.json({
                 status:false,
